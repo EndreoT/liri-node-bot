@@ -1,24 +1,31 @@
+"use strict"
+
+// Config
 require("dotenv").config();
 const keys = require("./keys.js");
 const textFilePath = 'random.txt';
 
 const fs = require('fs');
 
+// Third party packages
 const Spotify = require('node-spotify-api');
 const axios = require('axios');
 const moment = require('moment');
 
 const spotify = new Spotify(keys.spotify);
 
+// bands in town
 const bandsInTownAPIURLFirst = "https://rest.bandsintown.com/artists/";
 const bandsInTownAPIURLSecond = "/events?app_id=codingbootcamp";
 
-const OMDBApiURL = 'http://www.omdbapi.com/?apikey=trilogy&type=movie&plot=short&t='
+// OMDB
+const OMDBApiURL = 'http://www.omdbapi.com/?apikey=trilogy&type=movie&plot=short&t=';
 
 function makeBandsInTownURL(artist) {
     return bandsInTownAPIURLFirst + artist + bandsInTownAPIURLSecond;
 }
 
+// Makes an Axios GET requst to a given url. If successful, calls the callback on its response
 function getAPIResource(APIURL, callback) {
     axios.get(APIURL).then(response => {
         callback(response);
@@ -31,15 +38,15 @@ function bandsInTownResponse(response) {
     console.log('Venue locations:\n');
 
     response.data.forEach(item => {
-        const venue = item.venue
+        const venue = item.venue;
         const venueName = venue.name;
         const venueLocation = venue.city + ' ' + venue.country;
         const eventDate = item.datetime;
-        const eventDateFormatted = moment(eventDate).format('MM/DD/YYYY')
+        const eventDateFormatted = moment(eventDate).format('MM/DD/YYYY');
 
-        console.log(venueName)
-        console.log(venueLocation)
-        console.log(eventDateFormatted)
+        console.log(venueName);
+        console.log(venueLocation);
+        console.log(eventDateFormatted);
         console.log();
     });
 }
@@ -58,13 +65,13 @@ function OMDBResponse(response) {
     const actors = data.Actors
 
     console.log('Movie information \n');
-    console.log('Title: ' + title)
-    console.log('Year: ' + year)
-    console.log('Rotten Tomatoes rating: ' + rottenTomatoRating)
-    console.log('Country produced: ' + country)
-    console.log('Movie language: ' + language)
-    console.log('Plot: ' + plot)
-    console.log('Actors: ' + actors)
+    console.log('Title: ' + title);
+    console.log('Year: ' + year);
+    console.log('Rotten Tomatoes rating: ' + rottenTomatoRating);
+    console.log('Country produced: ' + country);
+    console.log('Movie language: ' + language);
+    console.log('Plot: ' + plot);
+    console.log('Actors: ' + actors);
 }
 
 function spotifyRequest(songTitle) {
@@ -91,64 +98,54 @@ function spotifyRequest(songTitle) {
         });
 }
 
-
-
-
-
-
-
 function handleCommand(command, args) {
-    // const command = process.argv[2];
+
     if (!command) {
-        return console.log("Please enter a command.")
+        return console.log("Please enter a command.");
     }
     switch (command) {
         case 'concert-this':
-            // const args = getArgs();
             if (args.length === 0) {
-                console.log('no artist')
+                return console.log('No artist given');
             }
-            getAPIResource(makeBandsInTownURL(args), bandsInTownResponse)
+            getAPIResource(makeBandsInTownURL(args), bandsInTownResponse);
             break;
         case 'spotify-this-song':
-            // let args = getArgs();
             if (args.length === 0) {
-                args = "The Sign"
+                args = "The Sign";
             }
-            spotifyRequest(args)
+            spotifyRequest(args);
             break;
         case 'movie-this':
-            // let args = getArgs();
             if (args.length === 0) {
                 args = 'Mr. Nobody';
             }
-            getAPIResource(OMDBApiURL + args, OMDBResponse)
+            getAPIResource(OMDBApiURL + args, OMDBResponse);
             break;
         case 'do-what-it-says':
 
+            // Read from file of previously used commands
             fs.readFile(textFilePath, 'utf8', function (err, response) {
                 if (err) {
-                    return console.log(err)
+                    return console.log(err);
                 }
+                // Get a random command
                 const commandPoolStr = response;
-                commandPoolArr = commandPoolStr.split(';')
-                const randomIndex = Math.floor(Math.random() * commandPoolArr.length)
+                const commandPoolArr = commandPoolStr.split(';');
+                const randomIndex = Math.floor(Math.random() * commandPoolArr.length);
                 const newArgs = commandPoolArr[randomIndex].split(',');
-                console.log(newArgs)
-                handleCommand(newArgs[0], newArgs[1])
+                handleCommand(newArgs[0], newArgs[1]);
             })
-
             break;
         case 'help':
-            console.log('Available commands:\n')
-            console.log('concert-this <artist/band name here>')
-            console.log('spotify-this-song <song name here>')
-            console.log('movie-this <movie name here>')
-            console.log('do-what-it-says')
+            console.log('Available commands:\n');
+            console.log('concert-this <artist/band name here>');
+            console.log('spotify-this-song <song name here>');
+            console.log('movie-this <movie name here>');
+            console.log('do-what-it-says');
             break;
         default:
-            console.log('Unrecognized command.')
-
+            console.log('Unrecognized command.');
     }
 }
 
@@ -160,5 +157,6 @@ function main() {
     const command = process.argv[2];
     handleCommand(command, getArgs());
 }
+// Add artist name to concert-this
 
 main();
