@@ -8,7 +8,7 @@ const moment = require('moment');
 const spotify = new Spotify(keys.spotify);
 
 const bandsInTownAPIURLFirst = "https://rest.bandsintown.com/artists/";
-const bandsInTownAPIURLSecond =  "/events?app_id=codingbootcamp";
+const bandsInTownAPIURLSecond = "/events?app_id=codingbootcamp";
 
 
 function makeBandsInTownURL(artist) {
@@ -24,7 +24,7 @@ function getAPIResource(APIURL) {
             const venueName = venue.name;
             const venueLocation = venue.city + ' ' + venue.country;
             const eventDate = item.datetime;
-            const eventDateFormatted = moment(eventDate).format('MM/DD/YYYY')  
+            const eventDateFormatted = moment(eventDate).format('MM/DD/YYYY')
             console.log(venueName)
             console.log(venueLocation)
             console.log(eventDateFormatted)
@@ -35,7 +35,27 @@ function getAPIResource(APIURL) {
     })
 }
 
+function spotifyRequest(songTitle) {
+    spotify
+        .search({ type: 'track', query: songTitle, limit: 20 })
+        .then(function (response) {
+            response.tracks.items.forEach(item => {
+                const artist = item.artists[0].name;
+                const songName = item.name;
+                const previewLink = item.preview_url;
+                const songAlbum = item.album.name;
 
+                console.log('Artist: ' + artist);
+                console.log('Song: ' + songName);
+                console.log("Preview Link: " + previewLink);
+                console.log('Album: ' + songAlbum);
+                console.log()
+            })
+        })
+        .catch(function (err) {
+            console.log(err);
+        });
+}
 
 
 
@@ -55,7 +75,13 @@ function handleCommand() {
             }
             getAPIResource(makeBandsInTownURL(artist))
             break;
-        
+        case 'spotify-this-song':
+            let songTitle = process.argv.slice(3);
+            if (songTitle.length === 0) {
+                songTitle =  "The Sign"
+            }
+            spotifyRequest(songTitle)
+                break;
         case 'help':
             console.log('help')
             break;
