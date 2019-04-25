@@ -1,0 +1,25 @@
+{
+  "name": "liri-node-bot",
+  "version": "1.0.0",
+  "description": "Language Interpretation and recognition interface",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EndreoT/liri-node-bot.git"
+  },
+  "author": "Tristan Endreo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/EndreoT/liri-node-bot/issues"
+  },
+  "homepage": "https://github.com/EndreoT/liri-node-bot#readme",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "dotenv": "^7.0.0",
+    "moment": "^2.24.0",
+    "node-spotify-api": "^1.1.1"
+  }
+}
