@@ -27,6 +27,7 @@ function makeBandsInTownURL(artist) {
 
 // Makes an Axios GET requst to a given url. If successful, calls the callback with the response as argument
 function getAPIResource(APIURL, callback, args, loggData) {
+    console.log('url', APIURL)
     axios.get(APIURL).then(response => {
         callback(response, args, loggData);
     }).catch(err => {
@@ -35,7 +36,7 @@ function getAPIResource(APIURL, callback, args, loggData) {
 }
 
 // Writes logged command and ars to text file 
-function loggData(args, command) {
+function loggDataToFile(args, command) {
     const loggedText = ';' + command + ',' + `"${args}"`
     fs.appendFile(textFilePath, loggedText, function (err) {
         if (err) {
@@ -63,7 +64,7 @@ function bandsInTownResponse(response, args, loggData) {
         });
 
         if (loggData) {
-            loggData(args, 'concert-this')
+            loggDataToFile(args, 'concert-this')
         }
         
 
@@ -99,7 +100,7 @@ function OMDBResponse(response, args, loggData) {
         console.log('Actors: ' + actors);
 
         if (loggData) {
-            loggData(args, 'movie-this')
+            loggDataToFile(args, 'movie-this')
         }
         
     } else {
@@ -132,8 +133,7 @@ function spotifyRequest(songTitle, loggData) {
                 })
     
                 if (loggData) {
-                    loggData(songTitle, 'spotify-this-song')
-
+                    loggDataToFile(songTitle, 'spotify-this-song')
                 }
                 
             } else {
@@ -149,7 +149,7 @@ function spotifyRequest(songTitle, loggData) {
 
 
 
-function handleCommand(command, args) {
+function handleCommand(command, args, loggData) {
 
     if (!command) {
         return console.log("Please enter a command and try again.");
@@ -159,19 +159,19 @@ function handleCommand(command, args) {
             if (args.length === 0) {
                 return console.log('No artist given');
             }
-            getAPIResource(makeBandsInTownURL(args), bandsInTownResponse, args);
+            getAPIResource(makeBandsInTownURL(args), bandsInTownResponse, args, loggData);
             break;
         case 'spotify-this-song':
             if (args.length === 0) {
                 args = "The Sign";
             }
-            spotifyRequest(args);
+            spotifyRequest(args, loggData);
             break;
         case 'movie-this':
             if (args.length === 0) {
                 args = 'Mr. Nobody';
             }
-            getAPIResource(OMDBApiURL + args, OMDBResponse, args);
+            getAPIResource(OMDBApiURL + args, OMDBResponse, args, loggData);
             break;
         case 'do-what-it-says':
 
@@ -184,8 +184,14 @@ function handleCommand(command, args) {
                 const commandPoolStr = response;
                 const commandPoolArr = commandPoolStr.split(';');
                 const randomIndex = Math.floor(Math.random() * commandPoolArr.length);
-                const newArgs = commandPoolArr[randomIndex].split(',');
-                handleCommand(newArgs[0], newArgs[1]);
+                const newCommandAndArgs = commandPoolArr[randomIndex].split(',');
+                const newCommand = newCommandAndArgs[0]
+                let newArgs = newCommandAndArgs[1]
+                if (newCommand === 'concert-this') {
+                    // Remove doube quotes ("") from string
+                    newArgs = newArgs.slice(1, newArgs.length - 1)
+                }
+                handleCommand(newCommand, newArgs, false);
             })
             break;
         case 'help':
@@ -206,7 +212,7 @@ function getArgs() {
 
 function main() {
     const command = process.argv[2];
-    handleCommand(command, getArgs());
+    handleCommand(command, getArgs(), true);
 }
 // Add artist name to concert-this
 
