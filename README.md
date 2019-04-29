@@ -1,14 +1,14 @@
 # LIRI Bot
 
 ## Description
-LIRI Bot is a node.js command line application that allows users to retrieve information about upcoming band concerts, songs, and movies.
+LIRI Bot is a node.js command line application that allows users to retrieve information about upcoming concerts, and preview songs and movies.
 
 ## Motivation 
-LIRI Bot is designed for the spartan minimalist who prefers to consume information in plain text from a terminal. One can get only what they need and nothing more, such as reading the clever plot from the movie 'Speed'.
+LIRI Bot is designed for the spartan minimalist who prefers to consume information in plain text from a terminal. One can get only what they need and nothing more, such as finding concert information about their favorite artists, and reading the clever plot from the movie 'Speed'.
 
 ### Installation
 ```
-git clone <SSH or HTTPS LIRI Bot link>
+git clone <SSH or HTTPS link for LIRI Bot repository>
 cd path/to/liri-node-bot/
 npm install
 touch .env

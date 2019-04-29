@@ -14,18 +14,19 @@ const moment = require('moment');
 
 const spotify = new Spotify(keys.spotify);
 
-// bands in town
+// bands in town URLs
 const bandsInTownAPIURLFirst = "https://rest.bandsintown.com/artists/";
 const bandsInTownAPIURLSecond = "/events?app_id=codingbootcamp";
 
-// OMDB
+// OMDB URL
 const OMDBApiURL = 'http://www.omdbapi.com/?apikey=trilogy&type=movie&plot=short&t=';
 
 function makeBandsInTownURL(artist) {
     return bandsInTownAPIURLFirst + artist + bandsInTownAPIURLSecond;
 }
 
-// Makes an Axios GET requst to a given url. If successful, calls the callback with the response as argument
+// Makes an Axios GET requst to a given url. If successful, calls the callback with the response as argument. 
+// Also takes additional arguments as args, and a boolean logData parameter
 function getAPIResource(APIURL, callback, args, logData) {
     axios.get(APIURL).then(response => {
         callback(response, args, logData);
@@ -52,16 +53,14 @@ function logDataToFile(args, command) {
                 return console.log(err);
             }
         })
-
     })
-
 }
 
 // handle bands in town api reponse
 function bandsInTownResponse(response, args, logData) {
     console.log('Venue locations for ' + args + ':' + '\n');
 
-    // If band exists
+    // Check if band exists
     if (!(typeof response.data.venue === 'string')) {
         response.data.forEach(item => {
             const venue = item.venue;
@@ -130,6 +129,7 @@ function spotifyRequest(songTitle, logData) {
         .then(function (response) {
 
             const tracks = response.tracks.items;
+            // Check if song exists
             if (tracks.length > 0) {
                 console.log(`Showing ${songLimit} results for the song '${songTitle}':\n`)
 
@@ -145,11 +145,9 @@ function spotifyRequest(songTitle, logData) {
                     console.log('Album: ' + songAlbum);
                     console.log()
                 })
-
                 if (logData) {
                     logDataToFile(songTitle, 'spotify-this-song')
                 }
-
             } else {
                 console.log('The song ' + songTitle + ' does not exist.')
             }
@@ -160,7 +158,7 @@ function spotifyRequest(songTitle, logData) {
 }
 
 // Determines handling of command and attitional string arguments arg from user input. 
-// If logData === true, then log both command and arg data to text file
+// If logData === true, then both command and arg data are logged to text file
 function handleCommand(command, args, logData) {
 
     if (!command) {
