@@ -26,26 +26,40 @@ function makeBandsInTownURL(artist) {
 }
 
 // Makes an Axios GET requst to a given url. If successful, calls the callback with the response as argument
-function getAPIResource(APIURL, callback, args, loggData) {
+function getAPIResource(APIURL, callback, args, logData) {
     console.log('url', APIURL)
     axios.get(APIURL).then(response => {
-        callback(response, args, loggData);
+        callback(response, args, logData);
     }).catch(err => {
         console.log(err);
     })
 }
 
-// Writes logged command and ars to text file 
-function loggDataToFile(args, command) {
-    const loggedText = ';' + command + ',' + `"${args}"`
-    fs.appendFile(textFilePath, loggedText, function (err) {
+// Writes logged command and args to text file 
+function logDataToFile(args, command) {
+
+    fs.readFile(textFilePath, 'utf8', function (err, data) {
         if (err) {
             return console.log(err);
         }
+        let loggedText = '';
+        if (data) {
+            // only preped addition with semicolon if data already exists in file
+            loggedText = ';'
+        }
+        loggedText += command + ',' + `"${args}"`
+        fs.appendFile(textFilePath, loggedText, function (err) {
+            if (err) {
+                return console.log(err);
+            }
+        })
+
     })
+
 }
 
-function bandsInTownResponse(response, args, loggData) {
+// handle bands in town api reponse
+function bandsInTownResponse(response, args, logData) {
     console.log('Venue locations for ' + args + ':' + '\n');
 
     // If band exists
@@ -63,10 +77,9 @@ function bandsInTownResponse(response, args, loggData) {
             console.log();
         });
 
-        if (loggData) {
-            loggDataToFile(args, 'concert-this')
+        if (logData) {
+            logDataToFile(args, 'concert-this')
         }
-        
 
     } else {
         console.log('The band ' + args + ' does not exist.')
@@ -74,13 +87,14 @@ function bandsInTownResponse(response, args, loggData) {
 
 }
 
-function OMDBResponse(response, args, loggData) {
+// Handle OMBD api response
+function OMDBResponse(response, args, logData) {
 
     const data = response.data;
     const title = data.Title;
     const year = data.Year;
 
-    // If movie exists
+    // Check if movie exists
     if (data.Response === 'True') {
         const rottenTomatoRating = data.Ratings.filter(item => {
             return item.Source === 'Rotten Tomatoes';
@@ -90,7 +104,7 @@ function OMDBResponse(response, args, loggData) {
         const plot = data.Plot;
         const actors = data.Actors
 
-        console.log('Movie information \n');
+        console.log('Movie information for ' + args + '\n');
         console.log('Title: ' + title);
         console.log('Year: ' + year);
         console.log('Rotten Tomatoes rating: ' + rottenTomatoRating);
@@ -99,18 +113,19 @@ function OMDBResponse(response, args, loggData) {
         console.log('Plot: ' + plot);
         console.log('Actors: ' + actors);
 
-        if (loggData) {
-            loggDataToFile(args, 'movie-this')
+        if (logData) {
+            logDataToFile(args, 'movie-this')
         }
-        
+
     } else {
         console.log('The movie ' + args + ' does not exist.')
     }
 
 }
 
-function spotifyRequest(songTitle, loggData) {
-    const songLimit = 20;
+// Handle spotify api reponse
+function spotifyRequest(songTitle, logData) {
+    const songLimit = 10;
     spotify
         .search({ type: 'track', query: songTitle, limit: songLimit })
         .then(function (response) {
@@ -124,32 +139,30 @@ function spotifyRequest(songTitle, loggData) {
                     const songName = item.name;
                     const previewLink = item.preview_url;
                     const songAlbum = item.album.name;
-    
+
                     console.log('Artist: ' + artist);
                     console.log('Song: ' + songName);
                     console.log("Preview Link: " + previewLink);
                     console.log('Album: ' + songAlbum);
                     console.log()
                 })
-    
-                if (loggData) {
-                    loggDataToFile(songTitle, 'spotify-this-song')
+
+                if (logData) {
+                    logDataToFile(songTitle, 'spotify-this-song')
                 }
-                
+
             } else {
                 console.log('The song ' + songTitle + ' does not exist.')
             }
-            
-
         })
         .catch(function (err) {
             console.log(err);
         });
 }
 
-
-
-function handleCommand(command, args, loggData) {
+// Determines handling of command and attitional string arguments arg from user input. 
+// If logData === true, then log both command and arg data to text file
+function handleCommand(command, args, logData) {
 
     if (!command) {
         return console.log("Please enter a command and try again.");
@@ -159,19 +172,19 @@ function handleCommand(command, args, loggData) {
             if (args.length === 0) {
                 return console.log('No artist given');
             }
-            getAPIResource(makeBandsInTownURL(args), bandsInTownResponse, args, loggData);
+            getAPIResource(makeBandsInTownURL(args), bandsInTownResponse, args, logData);
             break;
         case 'spotify-this-song':
             if (args.length === 0) {
                 args = "The Sign";
             }
-            spotifyRequest(args, loggData);
+            spotifyRequest(args, logData);
             break;
         case 'movie-this':
             if (args.length === 0) {
                 args = 'Mr. Nobody';
             }
-            getAPIResource(OMDBApiURL + args, OMDBResponse, args, loggData);
+            getAPIResource(OMDBApiURL + args, OMDBResponse, args, logData);
             break;
         case 'do-what-it-says':
 
@@ -185,12 +198,14 @@ function handleCommand(command, args, loggData) {
                 const commandPoolArr = commandPoolStr.split(';');
                 const randomIndex = Math.floor(Math.random() * commandPoolArr.length);
                 const newCommandAndArgs = commandPoolArr[randomIndex].split(',');
+
                 const newCommand = newCommandAndArgs[0]
                 let newArgs = newCommandAndArgs[1]
-                if (newCommand === 'concert-this') {
-                    // Remove doube quotes ("") from string
-                    newArgs = newArgs.slice(1, newArgs.length - 1)
-                }
+
+                // Remove double quotes ("") from string args
+                newArgs = newArgs.slice(1, newArgs.length - 1)
+
+                // Handle new command and args. Do not log to text file
                 handleCommand(newCommand, newArgs, false);
             })
             break;
@@ -206,6 +221,7 @@ function handleCommand(command, args, loggData) {
     }
 }
 
+// Extracts command line arguments
 function getArgs() {
     return process.argv.slice(3).join(' ');
 }
@@ -214,6 +230,5 @@ function main() {
     const command = process.argv[2];
     handleCommand(command, getArgs(), true);
 }
-// Add artist name to concert-this
 
 main();
