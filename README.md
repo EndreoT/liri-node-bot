@@ -18,17 +18,28 @@ SPOTIFY_ID=<your-spotify-id>
 SPOTIFY_SECRET=<your-spotify-secret>
 ```
 
-### Result
+### Results
+Users enter a command and additional arguments via the command line. API calls using the Ajax and Spotify npm modules retrieve information and display it to the console. If the command and additional arguments are valid (eg. the given movie name exists), they are saved to a text file as logging information.
+
+### Commands
 LIRI Bot can be run using one of four commands:
+1. Displays upcoming concerts for the given artist:
 ```
 node liri.js concert-this <artist/band name here>
 ```
-Returns upcoming concerst for the given artist.
+2. Displays infomation about songs matching the provided song name. Includes a Spotify link to the song preview:
 ```
 node liri.js spotify-this-song <song name here>
+```
+3. Displays information about a given movie such as title, Rotten Tomatoes rating, and actors:
+```
 node liri.js movie-this <movie name here>
+```
+4. Retrieves a random command and additional arguments pair from the included text file, parses them, and pases them to LIRI Bot:
+```
 node liri.js do-what-it-says
 ```
 
-### concert-this command
+### Examples
+#### concert-this command
 ![concert-this command](./assets/gifs/concert-this.gif)
