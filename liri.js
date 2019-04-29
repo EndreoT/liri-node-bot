@@ -27,7 +27,6 @@ function makeBandsInTownURL(artist) {
 
 // Makes an Axios GET requst to a given url. If successful, calls the callback with the response as argument
 function getAPIResource(APIURL, callback, args, logData) {
-    console.log('url', APIURL)
     axios.get(APIURL).then(response => {
         callback(response, args, logData);
     }).catch(err => {
