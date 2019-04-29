@@ -12,10 +12,22 @@ cd path/to/liri-node-bot/
 npm install
 touch .env
 ```
-In the .env file, add the following Spotify information:
+You will need a Spotify developer account. In the .env file, add the following Spotify information:
 ```
 SPOTIFY_ID=<your-spotify-id>
 SPOTIFY_SECRET=<your-spotify-secret>
+```
+
+### Result
+LIRI Bot can be run using one of four commands:
+```
+node liri.js concert-this <artist/band name here>
+```
+Returns upcoming concerst for the given artist.
+```
+node liri.js spotify-this-song <song name here>
+node liri.js movie-this <movie name here>
+node liri.js do-what-it-says
 ```
 
 ### concert-this command
